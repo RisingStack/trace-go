@@ -16,6 +16,7 @@ func Trace(fn http.HandlerFunc) http.HandlerFunc {
 type Transport struct {
 	Transport http.RoundTripper
 	Span      SpanID
+	Collector Collector
 }
 
 func (t Transport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -28,6 +29,9 @@ func (t Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req2 := t.setHeaders(req)
 
 	// TODO: Here comes the client send event
+
+	event := NewEvent(t.Span)
+	t.Collector.Record(event)
 
 	resp, err := transport.RoundTrip(req2)
 

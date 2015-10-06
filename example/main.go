@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/RisingStack/trace-go/trace"
 )
+
+var collector = trace.NewMemoryCollector()
 
 func handle2(rw http.ResponseWriter, r *http.Request) {
 	span := trace.NewSpanIDFromRequest(r)
@@ -29,7 +32,8 @@ func handle(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Id in 1st endpoint: " + span.String())
 	c := http.Client{
 		Transport: trace.Transport{
-			Span: span,
+			Span:      span,
+			Collector: collector,
 		},
 	}
 	_, err := c.Get("http://localhost:9876/test2")
@@ -42,6 +46,12 @@ func handle(rw http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/test", trace.Trace(handle))
 	http.HandleFunc("/test2", trace.Trace(handle2))
+	go func() {
+		time.Sleep(time.Duration(10) * time.Second)
+		for _, e := range collector.GetEvents() {
+			log.Println(e)
+		}
+	}()
 	log.Println("Listening on :9876")
 	log.Println(http.ListenAndServe(":9876", nil))
 }
