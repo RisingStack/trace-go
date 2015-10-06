@@ -1,25 +1,19 @@
 package trace
 
-import (
-	"time"
-
-	"github.com/twinj/uuid"
-)
+import "time"
 
 const (
 	RequestReceived = iota
 )
 
 type Event struct {
-	RequestId string
+	SpanID    ID
+	ParentID  ID
+	TraceID   ID
 	CreatedAt time.Time
 	Type      int
 }
 
-func NewEvent(t int) Event {
-	return Event{
-		RequestId: uuid.NewV4().String(),
-		Type:      t,
-		CreatedAt: time.Now(),
-	}
+func NewEvent() Event {
+	return Event{}
 }

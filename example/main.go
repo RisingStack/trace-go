@@ -9,32 +9,39 @@ import (
 )
 
 func handle2(rw http.ResponseWriter, r *http.Request) {
+	span := trace.NewSpanIDFromRequest(r)
+	log.Println("Id in 2nd endpoint: " + span.String() + " on URL: " + r.URL.String())
 	resp := struct {
 		Message string `json:"message"`
 	}{
-		trace.GetId(r),
+		"Message from Endpoint2 to Endpoint1",
 	}
-	log.Println("Id in 2nd endpoint: " + trace.GetId(r) + " on URL: " + r.URL.String())
 	json.NewEncoder(rw).Encode(resp)
 }
 
 func handle(rw http.ResponseWriter, r *http.Request) {
-	resp := struct {
+	msg := struct {
 		Message string `json:"message"`
 	}{
-		trace.GetId(r),
+		"Message from Endpoint1 to Endpoint2",
 	}
-	log.Println("Id in 1st endpoint: " + trace.GetId(r) + " on URL: " + r.URL.String())
-	_, err := trace.Get("http://localhost:9876/test2", r)
+	span := trace.NewSpanIDFromRequest(r)
+	log.Println("Id in 1st endpoint: " + span.String())
+	c := http.Client{
+		Transport: trace.Transport{
+			Span: span,
+		},
+	}
+	_, err := c.Get("http://localhost:9876/test2")
 	if err != nil {
 		log.Fatal(err)
 	}
-	json.NewEncoder(rw).Encode(resp)
+	json.NewEncoder(rw).Encode(msg)
 }
 
 func main() {
-	http.HandleFunc("/test", trace.Instrument(handle))
-	http.HandleFunc("/test2", trace.Instrument(handle2))
+	http.HandleFunc("/test", trace.Trace(handle))
+	http.HandleFunc("/test2", trace.Trace(handle2))
 	log.Println("Listening on :9876")
 	log.Println(http.ListenAndServe(":9876", nil))
 }
