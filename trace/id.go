@@ -129,3 +129,14 @@ func ParseSpanID(req *http.Request) SpanID {
 		Span:  spanID,
 	}
 }
+
+func (i *ID) MarshalJSON() ([]byte, error) {
+	return []byte("\"" + i.String() + "\""), nil
+}
+
+func (i *ID) UnmarshalJSON(b []byte) error {
+	s := string(b)
+	newID, err := ParseID(s[1 : len(s)-1])
+	i = &newID
+	return err
+}

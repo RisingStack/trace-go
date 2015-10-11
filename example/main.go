@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/RisingStack/trace-go/trace"
 )
@@ -43,15 +42,22 @@ func handle(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(msg)
 }
 
+func eventsHandler(rw http.ResponseWriter, r *http.Request) {
+	log.Println("Eventshandler called")
+	events := collector.GetEvents()
+	msg := struct {
+		Events []trace.Event `json:"events"`
+	}{
+		events,
+	}
+	json.NewEncoder(rw).Encode(msg)
+}
+
 func main() {
-	http.HandleFunc("/test", trace.Trace(handle))
-	http.HandleFunc("/test2", trace.Trace(handle2))
-	go func() {
-		time.Sleep(time.Duration(10) * time.Second)
-		for _, e := range collector.GetEvents() {
-			log.Println(e)
-		}
-	}()
+	http.HandleFunc("/test", trace.Trace(handle, collector))
+	http.HandleFunc("/test2", trace.Trace(handle2, collector))
+	http.HandleFunc("/events", trace.Trace(eventsHandler, collector))
+
 	log.Println("Listening on :9876")
 	log.Println(http.ListenAndServe(":9876", nil))
 }

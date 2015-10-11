@@ -7,9 +7,14 @@ const (
 	HeaderTraceID = "Trace-Trace"
 )
 
-func Trace(fn http.HandlerFunc) http.HandlerFunc {
+func Trace(fn http.HandlerFunc, collector Collector) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
+		span := NewSpanIDFromRequest(r)
+		event := NewEvent(span, RequestReceived)
+		collector.Record(event)
 		fn(rw, r)
+		event = NewEvent(span, RequestCompleted)
+		collector.Record(event)
 	}
 }
 
@@ -29,13 +34,14 @@ func (t Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req2 := t.setHeaders(req)
 
 	// TODO: Here comes the client send event
-
-	event := NewEvent(t.Span)
+	event := NewEvent(t.Span, ClientRequestSent)
 	t.Collector.Record(event)
 
 	resp, err := transport.RoundTrip(req2)
 
 	// TODO: Here comes the client receive event
+	event = NewEvent(t.Span, ClientRequestReceived)
+	t.Collector.Record(event)
 
 	return resp, err
 }
