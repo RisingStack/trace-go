@@ -7,6 +7,26 @@ const (
 	HeaderTraceID = "Trace-Trace"
 )
 
+type Tracer struct {
+	collector Collector
+	handler   http.Handler
+}
+
+func New(h http.Handler, c Collector) Tracer {
+	return Tracer{
+		collector: c,
+		handler:   h,
+	}
+}
+
+func (t Tracer) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	span := NewSpanIDFromRequest(r)
+	event := NewEvent(span, RequestReceived)
+	t.collector.Record(event)
+	t.handler.ServeHTTP(rw, r)
+	event = NewEvent(span, RequestCompleted)
+}
+
 func Trace(fn http.HandlerFunc, collector Collector) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		span := NewSpanIDFromRequest(r)

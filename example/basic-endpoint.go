@@ -54,13 +54,10 @@ func eventsHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	r := http.NewServeMux()
-	r.HandleFunc("/test", handle)
-	r.HandleFunc("/test2", handle2)
-	r.HandleFunc("/events", eventsHandler)
-
-	t := trace.New(r, collector)
+	http.HandleFunc("/test", trace.Trace(handle, collector))
+	http.HandleFunc("/test2", trace.Trace(handle2, collector))
+	http.HandleFunc("/events", trace.Trace(eventsHandler, collector))
 
 	log.Println("Listening on :9876")
-	log.Println(http.ListenAndServe(":9876", t))
+	log.Println(http.ListenAndServe(":9876", nil))
 }
