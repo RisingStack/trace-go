@@ -39,14 +39,17 @@ func init() {
 	b = make([]byte, aes.BlockSize)
 }
 
+// ID represents a unique ID
 type ID uint64
 
-// appdash String()
-func (id *ID) String() string {
-	return fmt.Sprintf("%016x", uint64(*id))
+// String satisfies the Stringer interface.
+// The implementaion comes from the appdash String implementation.
+func (i *ID) String() string {
+	return fmt.Sprintf("%016x", uint64(*i))
 }
 
-// appdash ParseID
+// ParseID parses a string into an ID. Return error if the parsing failed.
+// The implementaion comes from the appdash ParseID implementation.
 func ParseID(s string) (ID, error) {
 	i, err := strconv.ParseUint(s, 16, 64)
 	if err != nil {
@@ -55,10 +58,13 @@ func ParseID(s string) (ID, error) {
 	return ID(i), nil
 }
 
+// MarshalJSON marshal the ID into []byte, in the format returned
+// by String. It returns an error if it failed to marshal.
 func (i *ID) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + i.String() + "\""), nil
 }
 
+// UnmarshalJSON reads a JSON and sets the value according to it.
 func (i *ID) UnmarshalJSON(b []byte) error {
 	s := string(b)
 	newID, err := ParseID(s[1 : len(s)-1])
@@ -66,7 +72,8 @@ func (i *ID) UnmarshalJSON(b []byte) error {
 	return err
 }
 
-// appdash generateID
+// NewID returns a new generated unique ID.
+// The implementaion comes from the appdash ParseID implementation.
 func NewID() ID {
 	m.Lock()
 	if n == aes.BlockSize {
@@ -85,21 +92,29 @@ func NewID() ID {
 	return id
 }
 
+// SpanID represents a Span with Trace and Parent.
 type SpanID struct {
-	Trace  ID
-	Span   ID
+	// Trace contains the ID of the current trace itself.
+	Trace ID
+	// Span contains the ID of the current span.
+	Span ID
+	// Parent contains the Span ID of the parent.
 	Parent ID
 }
 
+// Empty return true if this SpanID is empty, elements are 0s.
 func (s *SpanID) Empty() bool {
 	return s.Trace == 0
 }
 
+// String return the string representation of the SpanID.
+// For human consumption.
 func (s *SpanID) String() string {
 	return fmt.Sprintf("<T:%s,S:%s,P:%s>", s.Trace.String(), s.Span.String(), s.Parent.String())
 }
 
-// Generates SpanID with new TraceID and SpanID
+// NewRootSpanID generates a new root SpanID with new Trace ID and Span ID.
+// Parent ID is 0.
 func NewRootSpanID() SpanID {
 	return SpanID{
 		Trace: NewID(),
@@ -107,9 +122,9 @@ func NewRootSpanID() SpanID {
 	}
 }
 
-// Generates a new SpanID from parent SpanID.
-// The newly generated SpanID inherits the TraceID from
-// parent and Parent will be set to the parent's Span
+// NewSpanID generates a new SpanID from parent SpanID.
+// The newly generated SpanID inherits the Trace ID from
+// parent and Parent ID will be set to the parent's Span ID.
 func NewSpanID(parent SpanID) SpanID {
 	return SpanID{
 		Trace:  parent.Trace,
