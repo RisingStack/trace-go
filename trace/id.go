@@ -6,8 +6,6 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
-	"log"
-	"net/http"
 	"strconv"
 	"sync"
 	"unsafe"
@@ -90,6 +88,7 @@ func (s *SpanID) String() string {
 	return fmt.Sprintf("<T:%s,S:%s,P:%s>", s.Trace.String(), s.Span.String(), s.Parent.String())
 }
 
+// Generates SpanID with new TraceID and SpanID
 func NewRootSpanID() SpanID {
 	return SpanID{
 		Trace: NewID(),
@@ -97,36 +96,14 @@ func NewRootSpanID() SpanID {
 	}
 }
 
+// Generates a new SpanID from parent SpanID.
+// The newly generated SpanID inherits the TraceID from
+// parent and Parent will be set to the parent's Span
 func NewSpanID(parent SpanID) SpanID {
 	return SpanID{
 		Trace:  parent.Trace,
 		Span:   NewID(),
 		Parent: parent.Span,
-	}
-}
-
-func NewSpanIDFromRequest(req *http.Request) SpanID {
-	parentSpanID := ParseSpanID(req)
-	if parentSpanID.IsRoot() {
-		return NewRootSpanID()
-	}
-	return NewSpanID(parentSpanID)
-}
-
-func ParseSpanID(req *http.Request) SpanID {
-	spanIDStr := req.Header.Get(HeaderSpanID)
-	traceIDStr := req.Header.Get(HeaderTraceID)
-	spanID, err := ParseID(spanIDStr)
-	if err != nil {
-		log.Println("Failed to parse spanID string value, using 0.")
-	}
-	traceID, err := ParseID(traceIDStr)
-	if err != nil {
-		log.Println("Failed to parse traceID string value, using 0.")
-	}
-	return SpanID{
-		Trace: traceID,
-		Span:  spanID,
 	}
 }
 

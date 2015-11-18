@@ -8,11 +8,7 @@ import (
 	"github.com/RisingStack/trace-go/trace"
 )
 
-var collector = trace.NewMemoryCollector()
-
 func handle2(rw http.ResponseWriter, r *http.Request) {
-	span := trace.NewSpanIDFromRequest(r)
-	log.Println("Id in 2nd endpoint: " + span.String() + " on URL: " + r.URL.String())
 	resp := struct {
 		Message string `json:"message"`
 	}{
@@ -27,15 +23,8 @@ func handle(rw http.ResponseWriter, r *http.Request) {
 	}{
 		"Message from Endpoint1 to Endpoint2",
 	}
-	span := trace.NewSpanIDFromRequest(r)
-	log.Println("Id in 1st endpoint: " + span.String())
-	c := http.Client{
-		Transport: trace.Transport{
-			Span:      span,
-			Collector: collector,
-		},
-	}
-	_, err := c.Get("http://localhost:9876/test2")
+	c := http.Client{Transport: trace.NewTransport(r)}
+	_, err := c.Get("http://index.hu")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +33,7 @@ func handle(rw http.ResponseWriter, r *http.Request) {
 
 func eventsHandler(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Eventshandler called")
-	events := collector.GetEvents()
+	events := trace.DefaultCollector.GetEvents()
 	msg := struct {
 		Events []trace.Event `json:"events"`
 	}{
@@ -59,7 +48,7 @@ func main() {
 	r.HandleFunc("/test2", handle2)
 	r.HandleFunc("/events", eventsHandler)
 
-	t := trace.New(r, collector)
+	t := trace.New(r)
 
 	log.Println("Listening on :9876")
 	log.Println(http.ListenAndServe(":9876", t))

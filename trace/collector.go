@@ -15,12 +15,12 @@ type MemoryCollector struct {
 	lock sync.Mutex
 }
 
-func (c MemoryCollector) Record(event Event) error {
+func (c *MemoryCollector) Record(event Event) error {
 	c.in <- event
 	return nil
 }
 
-func (c MemoryCollector) GetEvents() []Event {
+func (c *MemoryCollector) GetEvents() []Event {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	listLength := len(c.list)
