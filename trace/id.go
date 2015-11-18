@@ -61,7 +61,7 @@ func ParseID(s string) (ID, error) {
 // MarshalJSON marshal the ID into []byte, in the format returned
 // by String. It returns an error if it failed to marshal.
 func (i *ID) MarshalJSON() ([]byte, error) {
-	return []byte("\"" + i.String() + "\""), nil
+	return []byte(fmt.Sprintf("%q", i.String())), nil
 }
 
 // UnmarshalJSON reads a JSON and sets the value according to it.

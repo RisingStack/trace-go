@@ -5,6 +5,13 @@ import (
 	"net/http"
 )
 
+const (
+	// HeaderSpanID is the header name in requests for the SpanID.
+	HeaderSpanID = "Trace-Span"
+	// HeaderTraceID is the header name in requests for the TraceID.
+	HeaderTraceID = "Trace-Trace"
+)
+
 // Generates a new SpanID from a request. If there is no span information in the request, a root SpanID will be generated.
 func NewSpanIDFromRequest(req *http.Request) SpanID {
 	parentSpanID := ParseSpanID(req)

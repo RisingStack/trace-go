@@ -2,13 +2,6 @@ package trace
 
 import "net/http"
 
-const (
-	// HeaderSpanID is the header name in requests for the SpanID.
-	HeaderSpanID = "Trace-Span"
-	// HeaderTraceID is the header name in requests for the TraceID.
-	HeaderTraceID = "Trace-Trace"
-)
-
 // DefaultCollector is a MemoryCollector. Trace defaults back to DefaultCollector if none given.
 var DefaultCollector = NewMemoryCollector()
 
