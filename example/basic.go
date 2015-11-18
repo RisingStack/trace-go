@@ -24,7 +24,7 @@ func handle(rw http.ResponseWriter, r *http.Request) {
 		"Message from Endpoint1 to Endpoint2",
 	}
 	c := http.Client{Transport: trace.NewTransport(r)}
-	_, err := c.Get("http://index.hu")
+	_, err := c.Get("http://localhost:9876/test2")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,8 +48,8 @@ func main() {
 	r.HandleFunc("/test2", handle2)
 	r.HandleFunc("/events", eventsHandler)
 
-	t := trace.New(r)
+	t := trace.Trace{}
 
 	log.Println("Listening on :9876")
-	log.Println(http.ListenAndServe(":9876", t))
+	log.Println(http.ListenAndServe(":9876", t.Handler(r)))
 }

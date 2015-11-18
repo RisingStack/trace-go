@@ -9,40 +9,35 @@ const (
 
 var DefaultCollector = NewMemoryCollector()
 
-type Tracer struct {
+type Trace struct {
 	collector Collector
-	handler   http.Handler
 }
 
-func New(h http.Handler) Tracer {
-	return Tracer{
-		collector: DefaultCollector,
-		handler:   h,
+func (t *Trace) process(rw http.ResponseWriter, r *http.Request, f http.HandlerFunc) {
+	if t.collector == nil {
+		t.collector = DefaultCollector
 	}
-}
 
-func (t Tracer) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	span := NewSpanIDFromRequest(r)
 	event := NewEvent(span, RequestReceived)
 	t.collector.Record(event)
+
 	r2 := SetHeaders(r, span)
-	t.handler.ServeHTTP(rw, r2)
+	f(rw, r2)
+
 	event = NewEvent(span, RequestCompleted)
 	t.collector.Record(event)
 }
 
-func Trace(fn http.HandlerFunc) http.HandlerFunc {
-	return TraceWithCollector(fn, DefaultCollector)
+func (t *Trace) Handler(h http.Handler) http.Handler {
+	f := h.ServeHTTP
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		t.process(rw, r, f)
+	})
 }
 
-func TraceWithCollector(fn http.HandlerFunc, collector Collector) http.HandlerFunc {
+func (t *Trace) HandlerFunc(f http.HandlerFunc) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		span := NewSpanIDFromRequest(r)
-		event := NewEvent(span, RequestReceived)
-		collector.Record(event)
-		r2 := SetHeaders(r, span)
-		fn(rw, r2)
-		event = NewEvent(span, RequestCompleted)
-		collector.Record(event)
+		t.process(rw, r, f)
 	}
 }

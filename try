@@ -1,0 +1,2 @@
+#!/bin/bash
+curl --silent localhost:9876/test > /dev/null && curl --silent localhost:9876/events | jq '.events[].Span.Trace' | sort | uniq -c

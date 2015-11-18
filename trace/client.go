@@ -1,9 +1,6 @@
 package trace
 
-import (
-	"log"
-	"net/http"
-)
+import "net/http"
 
 type Transport struct {
 	Transport http.RoundTripper
@@ -30,13 +27,11 @@ func (t Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	event := NewEvent(t.Span, ClientRequestSent)
 	t.Collector.Record(event)
-	log.Println("Recording client start token: " + event.String())
 
 	resp, err := transport.RoundTrip(req2)
 
 	event = NewEvent(t.Span, ClientRequestReceived)
 	t.Collector.Record(event)
-	log.Println("Recording client end token: " + event.String())
 
 	return resp, err
 }

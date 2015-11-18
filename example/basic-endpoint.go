@@ -43,8 +43,9 @@ func eventsHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/test", trace.Trace(handle))
-	http.HandleFunc("/test2", trace.Trace(handle2))
+	t := trace.Trace{}
+	http.HandleFunc("/test", t.HandlerFunc(handle))
+	http.HandleFunc("/test2", t.HandlerFunc(handle2))
 	http.HandleFunc("/events", eventsHandler)
 
 	log.Println("Listening on :9876")
