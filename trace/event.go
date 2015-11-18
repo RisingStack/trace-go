@@ -25,7 +25,7 @@ func (e Event) String() string {
 
 func NewEvent(span SpanID, t int) Event {
 	return Event{
-		CreatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
 		EventID:   NewID(),
 		Span:      span,
 		Type:      t,
