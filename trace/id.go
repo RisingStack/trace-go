@@ -80,7 +80,7 @@ type SpanID struct {
 	Parent ID
 }
 
-func (s *SpanID) IsRoot() bool {
+func (s *SpanID) Empty() bool {
 	return s.Trace == 0
 }
 
@@ -114,6 +114,6 @@ func (i *ID) MarshalJSON() ([]byte, error) {
 func (i *ID) UnmarshalJSON(b []byte) error {
 	s := string(b)
 	newID, err := ParseID(s[1 : len(s)-1])
-	i = &newID
+	*i = newID
 	return err
 }

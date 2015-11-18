@@ -8,7 +8,7 @@ import (
 // Generates a new SpanID from a request. If there is no span information in the request, a root SpanID will be generated.
 func NewSpanIDFromRequest(req *http.Request) SpanID {
 	parentSpanID := ParseSpanID(req)
-	if parentSpanID.IsRoot() {
+	if parentSpanID.Empty() {
 		return NewRootSpanID()
 	}
 	return NewSpanID(parentSpanID)
