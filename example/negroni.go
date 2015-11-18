@@ -9,8 +9,6 @@ import (
 	"github.com/codegangsta/negroni"
 )
 
-var collector = trace.NewMemoryCollector()
-
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
@@ -18,11 +16,12 @@ func main() {
 	})
 
 	mux.HandleFunc("/events", func(w http.ResponseWriter, req *http.Request) {
-		json.NewEncoder(w).Encode(collector.GetEvents())
+		json.NewEncoder(w).Encode(trace.DefaultCollector.GetEvents())
 	})
 
 	n := negroni.Classic()
 	n.UseHandler(mux)
-	n.Use(trace.NewNegroniHandler(collector))
+	t := trace.Trace{}
+	n.Use(negroni.HandlerFunc(t.HandlerFuncNext))
 	n.Run(":3000")
 }

@@ -41,3 +41,8 @@ func (t *Trace) HandlerFunc(f http.HandlerFunc) http.HandlerFunc {
 		t.process(rw, r, f)
 	}
 }
+
+// Middleware function for Negroni integration
+func (t *Trace) HandlerFuncNext(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	t.process(rw, r, next)
+}
