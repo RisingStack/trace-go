@@ -11,22 +11,6 @@ import (
 	"unsafe"
 )
 
-type ID uint64
-
-// appdash String()
-func (id *ID) String() string {
-	return fmt.Sprintf("%016x", uint64(*id))
-}
-
-// appdash ParseID
-func ParseID(s string) (ID, error) {
-	i, err := strconv.ParseUint(s, 16, 64)
-	if err != nil {
-		return 0, err
-	}
-	return ID(i), nil
-}
-
 const (
 	idSize  = aes.BlockSize / 2 // 64 bits
 	keySize = aes.BlockSize     // 128 bits
@@ -53,6 +37,33 @@ func init() {
 	n = aes.BlockSize
 	ctr = buf[keySize:]
 	b = make([]byte, aes.BlockSize)
+}
+
+type ID uint64
+
+// appdash String()
+func (id *ID) String() string {
+	return fmt.Sprintf("%016x", uint64(*id))
+}
+
+// appdash ParseID
+func ParseID(s string) (ID, error) {
+	i, err := strconv.ParseUint(s, 16, 64)
+	if err != nil {
+		return 0, err
+	}
+	return ID(i), nil
+}
+
+func (i *ID) MarshalJSON() ([]byte, error) {
+	return []byte("\"" + i.String() + "\""), nil
+}
+
+func (i *ID) UnmarshalJSON(b []byte) error {
+	s := string(b)
+	newID, err := ParseID(s[1 : len(s)-1])
+	*i = newID
+	return err
 }
 
 // appdash generateID
@@ -105,15 +116,4 @@ func NewSpanID(parent SpanID) SpanID {
 		Span:   NewID(),
 		Parent: parent.Span,
 	}
-}
-
-func (i *ID) MarshalJSON() ([]byte, error) {
-	return []byte("\"" + i.String() + "\""), nil
-}
-
-func (i *ID) UnmarshalJSON(b []byte) error {
-	s := string(b)
-	newID, err := ParseID(s[1 : len(s)-1])
-	*i = newID
-	return err
 }
