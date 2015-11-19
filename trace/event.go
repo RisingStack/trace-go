@@ -20,7 +20,7 @@ type Event struct {
 }
 
 func (e Event) String() string {
-	return fmt.Sprintf("[ID: %s, Trace: %s, CreatedAt: %s]", e.EventID.String(), e.Span.Trace.String(), e.CreatedAt)
+	return fmt.Sprintf("[ID: %s, Trace: %s, Type: %d, CreatedAt: %s]", e.EventID.String(), e.Span.Trace.String(), e.Type, e.CreatedAt)
 }
 
 func NewEvent(span SpanID, t int) Event {

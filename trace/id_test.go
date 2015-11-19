@@ -1,9 +1,6 @@
 package trace
 
-import (
-	"log"
-	"testing"
-)
+import "testing"
 
 const (
 	TestIDStr = "094f13e642b9b07f"
@@ -79,9 +76,6 @@ func TestNewRootSpanID(t *testing.T) {
 
 func TestRootIsRoot(t *testing.T) {
 	i := NewRootSpanID()
-	log.Println(i.Empty())
-	log.Println(i.Parent)
-	log.Println(i.Parent == 0)
 	if i.Empty() {
 		t.Error("Newly created spanID should not be Empty", i.String())
 	}

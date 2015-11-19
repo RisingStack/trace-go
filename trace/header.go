@@ -1,9 +1,6 @@
 package trace
 
-import (
-	"log"
-	"net/http"
-)
+import "net/http"
 
 const (
 	// HeaderSpanID is the header name in requests for the SpanID.
@@ -25,14 +22,8 @@ func NewSpanIDFromRequest(req *http.Request) SpanID {
 func ParseSpanID(req *http.Request) SpanID {
 	spanIDStr := req.Header.Get(HeaderSpanID)
 	traceIDStr := req.Header.Get(HeaderTraceID)
-	spanID, err := ParseID(spanIDStr)
-	if err != nil {
-		log.Println("Failed to parse spanID string value, using 0.")
-	}
-	traceID, err := ParseID(traceIDStr)
-	if err != nil {
-		log.Println("Failed to parse traceID string value, using 0.")
-	}
+	spanID, _ := ParseID(spanIDStr)
+	traceID, _ := ParseID(traceIDStr)
 	return SpanID{
 		Trace: traceID,
 		Span:  spanID,
