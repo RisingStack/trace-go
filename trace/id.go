@@ -103,7 +103,7 @@ type SpanID struct {
 }
 
 // Empty return true if this SpanID is empty, elements are 0s.
-func (s *SpanID) Empty() bool {
+func (s *SpanID) IsEmpty() bool {
 	return s.Trace == 0
 }
 

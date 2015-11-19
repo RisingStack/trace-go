@@ -12,7 +12,7 @@ const (
 // Generates a new SpanID from a request. If there is no span information in the request, a root SpanID will be generated.
 func NewSpanIDFromRequest(req *http.Request) SpanID {
 	parentSpanID := ParseSpanID(req)
-	if parentSpanID.Empty() {
+	if parentSpanID.IsEmpty() {
 		return NewRootSpanID()
 	}
 	return NewSpanID(parentSpanID)

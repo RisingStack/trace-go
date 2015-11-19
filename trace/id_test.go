@@ -1,6 +1,9 @@
 package trace
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 const (
 	TestIDStr = "094f13e642b9b07f"
@@ -35,7 +38,7 @@ func TestWrongParseID(t *testing.T) {
 	}
 }
 
-func TestString(t *testing.T) {
+func TestIDString(t *testing.T) {
 	i := ID(TestIDVal)
 	if i.String() != TestIDStr {
 		t.Errorf("String ID value does not match: %s", i.String())
@@ -76,8 +79,8 @@ func TestNewRootSpanID(t *testing.T) {
 
 func TestRootIsRoot(t *testing.T) {
 	i := NewRootSpanID()
-	if i.Empty() {
-		t.Error("Newly created spanID should not be Empty", i.String())
+	if i.IsEmpty() {
+		t.Error("Newly created spanID should not be empty", i.String())
 	}
 }
 
@@ -98,15 +101,15 @@ func TestNewSpanID(t *testing.T) {
 func TestNotRootIsNotRoot(t *testing.T) {
 	p := NewRootSpanID()
 	i := NewSpanID(p)
-	if i.Empty() {
-		t.Error("Newly created spanID should not be Empty", i.String())
+	if i.IsEmpty() {
+		t.Error("Newly created spanID should not be empty", i.String())
 	}
 }
 
 func TestEmpty(t *testing.T) {
 	i := SpanID{}
-	if !i.Empty() {
-		t.Error("Newly created spanID without anything should be Empty", i.String())
+	if !i.IsEmpty() {
+		t.Error("Newly created spanID without anything should be empty", i.String())
 	}
 }
 
@@ -138,7 +141,7 @@ func TestMarshallID(t *testing.T) {
 
 func TestUnMarshallID(t *testing.T) {
 	var i ID
-	b := []byte("\"" + TestIDStr + "\"")
+	b := []byte(fmt.Sprintf("%q", TestIDStr))
 	err := i.UnmarshalJSON(b)
 	if err != nil {
 		t.Error("Failed to unmarshal ID. ", err)
