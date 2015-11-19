@@ -49,6 +49,7 @@ func (i *ID) String() string {
 }
 
 // ParseID parses a string into an ID. Return error if the parsing failed.
+// If the parsing fails, the function returns 0 and the error.
 // The implementaion comes from the appdash ParseID implementation.
 func ParseID(s string) (ID, error) {
 	i, err := strconv.ParseUint(s, 16, 64)
