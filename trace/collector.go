@@ -14,14 +14,14 @@ type Collector interface {
 type MemoryCollector struct {
 	list []Event
 	in   chan Event
-	lock sync.Mutex
+	lock sync.RWMutex
 }
 
 func NewMemoryCollector() *MemoryCollector {
 	c := MemoryCollector{}
 	c.list = make([]Event, 0, NumberOfEventsBeforeFlush)
 	c.in = make(chan Event)
-	c.lock = sync.Mutex{}
+	c.lock = sync.RWMutex{}
 	go func() {
 		for {
 			e := <-c.in
@@ -39,8 +39,8 @@ func (c *MemoryCollector) Record(event Event) error {
 }
 
 func (c *MemoryCollector) GetEvents() []Event {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 	listLength := len(c.list)
 	newList := make([]Event, listLength)
 	copied := copy(newList, c.list)

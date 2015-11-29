@@ -10,7 +10,7 @@ type Trace struct {
 	collector Collector
 }
 
-func (t *Trace) process(rw http.ResponseWriter, r *http.Request, f http.HandlerFunc) {
+func (t *Trace) process(rw http.ResponseWriter, r *http.Request, f http.Handler) {
 	if t.collector == nil {
 		t.collector = DefaultCollector
 	}
@@ -20,7 +20,7 @@ func (t *Trace) process(rw http.ResponseWriter, r *http.Request, f http.HandlerF
 	t.collector.Record(event)
 
 	r2 := SetHeaders(r, span)
-	f(rw, r2)
+	f.ServeHTTP(rw, r2)
 
 	event = NewEvent(span, RequestCompleted)
 	t.collector.Record(event)
@@ -28,20 +28,15 @@ func (t *Trace) process(rw http.ResponseWriter, r *http.Request, f http.HandlerF
 
 // Handler wraps an existing http.Handler with Trace functionality.
 func (t *Trace) Handler(h http.Handler) http.Handler {
-	f := h.ServeHTTP
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		t.process(rw, r, f)
+		t.process(rw, r, h)
 	})
 }
 
 // HandlerFunc wraps an existing http.HandlerFunc with Trace functionality.
 func (t *Trace) HandlerFunc(f http.HandlerFunc) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		t.process(rw, r, f)
+		t.process(rw, r, http.HandlerFunc(f))
 	}
-}
 
-// HandlerFuncNext middleware function can be used for Negroni integration.
-func (t *Trace) HandlerFuncNext(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	t.process(rw, r, next)
 }
