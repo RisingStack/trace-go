@@ -1,25 +1,33 @@
 package trace
 
 import (
+	"fmt"
 	"time"
-
-	"github.com/twinj/uuid"
 )
 
 const (
 	RequestReceived = iota
+	RequestCompleted
+	ClientRequestSent
+	ClientRequestReceived
 )
 
 type Event struct {
-	RequestId string
+	EventID   ID
+	Span      SpanID
 	CreatedAt time.Time
 	Type      int
 }
 
-func NewEvent(t int) Event {
+func (e Event) String() string {
+	return fmt.Sprintf("[ID: %s, Trace: %s, Type: %d, CreatedAt: %s]", e.EventID.String(), e.Span.Trace.String(), e.Type, e.CreatedAt)
+}
+
+func NewEvent(span SpanID, t int) Event {
 	return Event{
-		RequestId: uuid.NewV4().String(),
+		CreatedAt: time.Now().UTC(),
+		EventID:   NewID(),
+		Span:      span,
 		Type:      t,
-		CreatedAt: time.Now(),
 	}
 }
