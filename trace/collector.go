@@ -21,7 +21,6 @@ func NewMemoryCollector() *MemoryCollector {
 	c := MemoryCollector{}
 	c.list = make([]Event, 0, NumberOfEventsBeforeFlush)
 	c.in = make(chan Event)
-	c.lock = sync.RWMutex{}
 	go func() {
 		for {
 			e := <-c.in

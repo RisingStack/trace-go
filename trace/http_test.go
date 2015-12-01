@@ -16,7 +16,6 @@ type TestCollector struct {
 func NewTestCollector() *TestCollector {
 	c := TestCollector{}
 	c.list = make([]Event, 0, NumberOfEventsBeforeFlush)
-	c.lock = sync.Mutex{}
 	return &c
 }
 
