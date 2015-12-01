@@ -1,5 +1,6 @@
 
 # Trace Go collector
+[![Build Status](https://travis-ci.org/RisingStack/trace-go.svg)](https://travis-ci.org/RisingStack/trace-go)
 
 ## Usage
 For an example usage please see the example service in the example folder.
